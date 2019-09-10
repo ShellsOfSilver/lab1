@@ -25,6 +25,7 @@
     "jsonwebtoken": "^8.3.0",
     "mongoose": "^5.4.19",
     "morgan": "^1.9.1",
+    "napajs": "^0.2.3",
     "winston": "^3.0.0"
   },
   "devDependencies": {

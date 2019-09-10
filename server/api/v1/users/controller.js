@@ -1,5 +1,8 @@
 const User = require('./model');
 
+const noWorker = require('../../../hash/no-worker');
+const worker = require('../../../hash/worker');
+
 exports.signup = (req, res, next) => {
   const {
     body,
@@ -12,7 +15,6 @@ exports.signup = (req, res, next) => {
     })
     .exec()
     .then((user) => {
-      
       if (!user) {
         cUser.save()
           .then((created) => {
@@ -20,7 +22,7 @@ exports.signup = (req, res, next) => {
               success: true,
               item: created,
             });
-          })
+          });
       } else {
         next();
       }
@@ -31,6 +33,14 @@ exports.signup = (req, res, next) => {
 };
 
 exports.all = (req, res, next) => {
+
+  
+console.log(noWorker.MD5('habr'));
+console.log(noWorker.SHA256('habr'));
+
+console.log(worker.MD5('habr'));
+console.log(worker.SHA256('habr'));
+
   User.find().then((users) => {
     res.json({
       success: true,

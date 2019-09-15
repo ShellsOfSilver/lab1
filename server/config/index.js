@@ -2,14 +2,11 @@ require('dotenv').config();
 
 const config = {
   server: {
-    hostname: process.env.SERVER_HOSTNAME,
-    port: process.env.SERVER_PORT,
-  },
-  jwt: {
-    secret: process.env.JWTSECRET,
+    hostname: '127.0.0.1',
+    port: '3000',
   },
   database: {
-    url: process.env.DATABASE_URL,
+    url: 'mongodb://127.0.0.1/nodeauth',
   },
 };
 

@@ -1,7 +1,10 @@
 const User = require('./model');
+const napa = require("napajs");
 
-const noWorker = require('../../../hash/no-worker');
-const worker = require('../../../hash/worker');
+const hash = require('../../../hash/hash');
+
+const NUMBER_OF_WORKERS = 5;
+let zone = napa.zone.create('zone', { workers: NUMBER_OF_WORKERS });
 
 exports.signup = (req, res, next) => {
   const {
@@ -32,24 +35,37 @@ exports.signup = (req, res, next) => {
     });
 };
 
-exports.all = (req, res, next) => {
+exports.all = async (req, res, next) => {
+  const TEST_ITERATIONS = 1000;
+  const text = 'habr';
 
-  
-console.log(noWorker.MD5('habr'));
-console.log(noWorker.SHA256('habr'));
+  let startTime = Date.now();
+  for (let i = 0; i < TEST_ITERATIONS; i++) {
+    hash.MD5(text);
+    hash.SHA256(text);
+  }
+  console.log('\n-----------\nsync test iterations: ' + TEST_ITERATIONS + ', timestamp: ' + (Date.now() - startTime));
 
-console.log(worker.MD5('habr'));
-console.log(worker.SHA256('habr'));
-
+  const promises = [];
+  startTime = Date.now();
+  for (let i = 0; i < TEST_ITERATIONS; i++) {
+    promises.push(zone.execute((md5, sha256, text) => {
+      md5(text);
+      sha256(text);
+    }, [hash.MD5, hash.SHA256, text]));
+  }
+  await Promise.all(promises);
+  console.log('-----------\nnapajs test iterations: ' + TEST_ITERATIONS + ', timestamp: ' + (Date.now() - startTime) + ', number of workers: ' + NUMBER_OF_WORKERS);
+  console.log('-----------\n');
   User.find().then((users) => {
     res.json({
       success: true,
       item: users,
     });
   })
-  .catch((error) => {
-    next(new Error(error));
-  });
+    .catch((error) => {
+      next(new Error(error));
+    });
 };
 
 exports.signin = (req, res, next) => {

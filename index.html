@@ -1,0 +1,395 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Skakun Yevhenii 403 LAB_1</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <h3 style="text-align: center;">Skakun Yevhenii 403 LAB_1_2 SHA256, MD5</h3>
+
+    <form
+      style="width: 80%; margin: 0 auto;"
+      action='#'
+      method='post'>
+      Email:
+      <br>
+      <input
+        style="width: 100%; margin-bottom: 20px"
+        type='text'
+        value="test@test.com"
+        name='inputDataEmail'
+        id='inputDataEmail'>
+      Password:
+      <br>
+      <input
+        style="width: 100%; margin-bottom: 20px"
+        type='text'
+        value="habrahabr"
+        name='inputDataPassword'
+        id='inputDataPassword'>
+      <br>
+      <input
+        style="width: 100%;"
+        type='button'
+        id='SignInSha256'
+        value='Sign In (Sha256)'>
+      <input
+        style="width: 100%; margin-bottom: 20px"
+        type='button'
+        id='SignInMd5'
+        value='Sign In (MD5)'>
+
+      <input
+        style="width: 100%;"
+        type='button'
+        id='SignUpSha256'
+        value='Sign Up (Sha256)'>
+      <input
+        style="width: 100%; margin-bottom: 20px"
+        type='button'
+        id='SignUpMd5'
+        value='Sign Up (MD5)'>
+
+      <input
+        style="width: 100%; margin-bottom: 20px"
+        type='button'
+        id='getAll'
+        value='Get All'>
+      <br>
+      Result password hash code:
+      <br>
+      <input
+        style="width: 100%;"
+        type='text'
+        name='hashResult'
+        id='hashResult'>
+    </form>
+    <script>
+      const SHA256 = (s) => {
+            const chrsz = 8;
+            // prevent out of renge
+            const safeAdd = (x, y) => {
+                const lsw = (x & 65535) + (y & 65535);
+                const msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+                return (msw << 16) | (lsw & 65535);
+            }
+            // Rotates right (circular right shift) value x by n positions
+            const S = (X, n) => {
+                return (X >>> n) | (X << (32 - n));
+            }
+
+            const R = (X, n) => {
+                return (X >>> n);
+            }
+            // Logical functions 'choice'
+            const Ch = (x, y, z) => {
+                return ((x & y) ^ ((~x) & z));
+            }
+            // Logical functions 'majority'
+            const Maj = (x, y, z) => {
+                return ((x & y) ^ (x & z) ^ (y & z));
+            }
+            // Logical functions
+            const Sigma0256 = (x) => {
+                return (S(x, 2) ^ S(x, 13) ^ S(x, 22));
+            }
+            // Logical functions
+            const Sigma1256 = (x) => {
+                return (S(x, 6) ^ S(x, 11) ^ S(x, 25));
+            }
+            // Logical functions
+            const Gamma0256 = (x) => {
+                return (S(x, 7) ^ S(x, 18) ^ R(x, 3));
+            }
+            // Logical functions
+            const Gamma1256 = (x) => {
+                return (S(x, 17) ^ S(x, 19) ^ R(x, 10));
+            }
+
+            const coreSha256 = (m, l) => {
+                // constants 
+                const K = new Array(
+                    1116352408, 1899447441, 3049323471, 3921009573, 
+                    961987163, 1508970993, 2453635748, 2870763221, 
+                    3624381080, 310598401, 607225278, 1426881987, 
+                    1925078388, 2162078206, 2614888103, 3248222580, 
+                    3835390401, 4022224774, 264347078, 604807628, 
+                    770255983, 1249150122, 1555081692, 1996064986, 
+                    2554220882, 2821834349, 2952996808, 3210313671, 
+                    3336571891, 3584528711, 113926993, 338241895, 
+                    666307205, 773529912, 1294757372, 1396182291, 
+                    1695183700, 1986661051, 2177026350, 2456956037, 
+                    2730485921, 2820302411, 3259730800, 3345764771, 
+                    3516065817, 3600352804, 4094571909, 275423344, 
+                    430227734, 506948616, 659060556, 883997877, 
+                    958139571, 1322822218, 1537002063, 1747873779, 
+                    1955562222, 2024104815, 2227730452, 2361852424, 
+                    2428436474, 2756734187, 3204031479, 3329325298);
+                // initial hash value 
+                const HASH = new Array(
+                    1779033703, 3144134277, 1013904242, 
+                    2773480762, 1359893119, 2600822924, 
+                    528734635, 1541459225);
+                // 1 - prepare message schedule 'W'
+                const W = new Array(64);
+                let a, b, c, d, e, f, g, h, i, j;
+                let T1, T2;
+                m[l >> 5] |= 0x80 << (24 - l % 32);
+                m[((l + 64 >> 9) << 4) + 15] = l;
+                // HASH COMPUTATION
+                for (let i = 0; i < m.length; i += 16) {
+                    // 2 - initialise working variables a, b, c, d, e, f, g, h with previous hash value
+                    a = HASH[0];
+                    b = HASH[1];
+                    c = HASH[2];
+                    d = HASH[3];
+                    e = HASH[4];
+                    f = HASH[5];
+                    g = HASH[6];
+                    h = HASH[7];
+                    // 3 - main loop (note '>>> 0' for 'addition modulo 2^32')
+                    for (let j = 0; j < 64; j++) {
+                        if (j < 16) W[j] = m[j + i];
+                        else W[j] = safeAdd(safeAdd(safeAdd(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);
+                        T1 = safeAdd(safeAdd(safeAdd(safeAdd(h, Sigma1256(e)), Ch(e, f, g)), K[j]), W[j]);
+                        T2 = safeAdd(Sigma0256(a), Maj(a, b, c));
+                        h = g;
+                        g = f;
+                        f = e;
+                        e = safeAdd(d, T1);
+                        d = c;
+                        c = b;
+                        b = a;
+                        a = safeAdd(T1, T2);
+                    }
+                    // 4 - compute the new intermediate hash value (note '>>> 0' for 'addition modulo 2^32')
+                    HASH[0] = safeAdd(a, HASH[0]);
+                    HASH[1] = safeAdd(b, HASH[1]);
+                    HASH[2] = safeAdd(c, HASH[2]);
+                    HASH[3] = safeAdd(d, HASH[3]);
+                    HASH[4] = safeAdd(e, HASH[4]);
+                    HASH[5] = safeAdd(f, HASH[5]);
+                    HASH[6] = safeAdd(g, HASH[6]);
+                    HASH[7] = safeAdd(h, HASH[7]);
+                }
+                return HASH;
+            }
+
+            // convert string msg into 512-bit blocks (array of 16 32-bit integers)
+            const str2binb = (str) => {
+                const bin = Array();
+                const mask = (1 << chrsz) - 1; // 128
+                for (let i = 0; i < str.length * chrsz; i += chrsz) {
+                    bin[i >> 5] |= (str.charCodeAt(i / chrsz) & mask) << (24 - i % 32);
+                }
+                return bin;
+            }
+
+            const binb2hex = (binarray) => {
+                const hex_tab = '0123456789ABCDEF';
+                let str = '';
+                for (let i = 0; i < binarray.length * 4; i++) {
+                    str += hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8 + 4)) & 0xF) +
+                        hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8)) & 0xF);
+                }
+                return str;
+            }
+
+            return binb2hex(coreSha256(str2binb(s), s.length * chrsz)); // add trailing chrsz 0x8 '1' bit (+ 0's padding) to string 
+        }
+
+        const MD5 = (s) => {
+            // Let [abcd k s i] denote the operation a = b + ((a + F(b,c,d) + X[k] + T[i]) <<< s).
+            const k = (a, b, c, d, x, s, t) => {
+                const n = a + (b & c | ~b & d) + (x >>> 0) + t;
+                return ((n << s) | (n >>> (32 - s))) + b;
+            }
+            // Let [abcd k s i] denote the operation a = b + ((a + G(b,c,d) + X[k] + T[i]) <<< s).
+            const l = (a, b, c, d, x, s, t) => {
+                const n = a + (b & d | c & ~d) + (x >>> 0) + t;
+                return ((n << s) | (n >>> (32 - s))) + b;
+            }
+            // Let [abcd k s t] denote the operation a = b + ((a + H(b,c,d) + X[k] + T[i]) <<< s).
+            const m = (a, b, c, d, x, s, t) => {
+                const n = a + (b ^ c ^ d) + (x >>> 0) + t;
+                return ((n << s) | (n >>> (32 - s))) + b;
+            }
+            // Let [abcd k s t] denote the operation a = b + ((a + I(b,c,d) + X[k] + T[i]) <<< s).
+            const n = (a, b, c, d, x, s, t) => {
+                const n = a + (c ^ (b | ~d)) + (x >>> 0) + t;
+                return ((n << s) | (n >>> (32 - s))) + b;
+            }
+            // Intermediate hash value
+            const p = (a) => {
+                let b = "", d = "", c;
+                // 'Endianness' convert the bytes to the canonical byte order
+                for (c = 0; 3 >= c; c++) {
+                    d = a >>> 8 * c & 255, d = "0" + d.toString(16), b += d.substr(d.length - 2, 2);
+                }
+                return b
+            }
+            var f = [], q, r, s, t, a, b, c, d;
+            f = function(b) {
+                var a, c = b.length;
+                a = c + 8;
+                // 448 module 512 
+                for (var d = 16 * ((a - a % 64) / 64 + 1), e = Array(d - 1), f = 0, g = 0; g < c;) {
+                    a = (g - g % 4) / 4, f = g % 4 * 8, e[a] |= b.charCodeAt(g) << f, g++;
+                }
+                a = (g - g % 4) / 4;
+                e[a] |= 128 << g % 4 * 8;
+                e[d - 2] = c << 3;
+                e[d - 1] = c >>> 29;
+                return e
+            }(s);
+            // init const
+            a = 1732584193;
+            b = 4023233417;
+            c = 2562383102;
+            d = 271733878;
+            for (e = 0; e < f.length; e += 16) {
+                q = a;
+                r = b;
+                s = c;
+                t = d;
+                // Round 1.
+                a = k(a, b, c, d, f[e + 0], 7, -680876936);
+                d = k(d, a, b, c, f[e + 1], 12, -389564586);
+                c = k(c, d, a, b, f[e + 2], 17, 606105819);
+                b = k(b, c, d, a, f[e + 3], 22, -1044525330);
+                a = k(a, b, c, d, f[e + 4], 7, -176418897);
+                d = k(d, a, b, c, f[e + 5], 12, 1200080426);
+                c = k(c, d, a, b, f[e + 6], 17, -1473231341);
+                b = k(b, c, d, a, f[e + 7], 22, -45705983);
+                a = k(a, b, c, d, f[e + 8], 7, 1770035416);
+                d = k(d, a, b, c, f[e + 9], 12, -1958414417);
+                c = k(c, d, a, b, f[e + 10], 17, -42063);
+                b = k(b, c, d, a, f[e + 11], 22, -1990404162);
+                a = k(a, b, c, d, f[e + 12], 7, 1804603682);
+                d = k(d, a, b, c, f[e + 13], 12, -40341101);
+                c = k(c, d, a, b, f[e + 14], 17, -1502002290);
+                b = k(b, c, d, a, f[e + 15], 22, 1236535329);
+                // Round 2.
+                a = l(a, b, c, d, f[e + 1], 5, -165796510);
+                d = l(d, a, b, c, f[e + 6], 9, -1069501632);
+                c = l(c, d, a, b, f[e + 11], 14, 643717713);
+                b = l(b, c, d, a, f[e + 0], 20, -373897302);
+                a = l(a, b, c, d, f[e + 5], 5, -701558691);
+                d = l(d, a, b, c, f[e + 10], 9, 38016083);
+                c = l(c, d, a, b, f[e + 15], 14, -660478335);
+                b = l(b, c, d, a, f[e + 4], 20, -405537848);
+                a = l(a, b, c, d, f[e + 9], 5, 568446438);
+                d = l(d, a, b, c, f[e + 14], 9, -1019803690);
+                c = l(c, d, a, b, f[e + 3], 14, -187363961);
+                b = l(b, c, d, a, f[e + 8], 20, 1163531501);
+                a = l(a, b, c, d, f[e + 13], 5, -1444681467);
+                d = l(d, a, b, c, f[e + 2], 9, -51403784);
+                c = l(c, d, a, b, f[e + 7], 14, 1735328473);
+                b = l(b, c, d, a, f[e + 12], 20, -1926607734);
+                // Round 3.
+                a = m(a, b, c, d, f[e + 5], 4, -378558);
+                d = m(d, a, b, c, f[e + 8], 11, -2022574463);
+                c = m(c, d, a, b, f[e + 11], 16, 1839030562);
+                b = m(b, c, d, a, f[e + 14], 23, -35309556);
+                a = m(a, b, c, d, f[e + 1], 4, -1530992060);
+                d = m(d, a, b, c, f[e + 4], 11, 1272893353);
+                c = m(c, d, a, b, f[e + 7], 16, -155497632);
+                b = m(b, c, d, a, f[e + 10], 23, -1094730640);
+                a = m(a, b, c, d, f[e + 13], 4, 681279174);
+                d = m(d, a, b, c, f[e + 0], 11, -358537222);
+                c = m(c, d, a, b, f[e + 3], 16, -722521979);
+                b = m(b, c, d, a, f[e + 6], 23, 76029189);
+                a = m(a, b, c, d, f[e + 9], 4, -640364487);
+                d = m(d, a, b, c, f[e + 12], 11, -421815835);
+                c = m(c, d, a, b, f[e + 15], 16, 530742520);
+                b = m(b, c, d, a, f[e + 2], 23, -995338651);
+                // Round 4.
+                a = n(a, b, c, d, f[e + 0], 6, -198630844);
+                d = n(d, a, b, c, f[e + 7], 10, 1126891415);
+                c = n(c, d, a, b, f[e + 14], 15, -1416354905);
+                b = n(b, c, d, a, f[e + 5], 21, -57434055);
+                a = n(a, b, c, d, f[e + 12], 6, 1700485571);
+                d = n(d, a, b, c, f[e + 3], 10, -1894986606);
+                c = n(c, d, a, b, f[e + 10], 15, -1051523);
+                b = n(b, c, d, a, f[e + 1], 21, -2054922799);
+                a = n(a, b, c, d, f[e + 8], 6, 1873313359);
+                d = n(d, a, b, c, f[e + 15], 10, -30611744);
+                c = n(c, d, a, b, f[e + 6], 15, -1560198380);
+                b = n(b, c, d, a, f[e + 13], 21, 1309151649);
+                a = n(a, b, c, d, f[e + 4], 6, -145523070);
+                d = n(d, a, b, c, f[e + 11], 10, -1120210379);
+                c = n(c, d, a, b, f[e + 2], 15, 718787259);
+                b = n(b, c, d, a, f[e + 9], 21, -343485551);
+
+                a = (a + q) >>> 0;
+                b = (b + r) >>> 0;
+                c = (c + s) >>> 0;
+                d = (d + t) >>> 0;
+            }
+            // Then perform the following additions. (That is increment each 
+            // of the four registers by the value it had before this block was started.)
+            return (p(a) + p(b) + p(c) + p(d)).toLowerCase();
+        }
+
+        const auth = (method, mode) => {
+            const email = document.getElementById('inputDataEmail').value;
+            const password = document.getElementById('inputDataPassword').value;
+            const hash = method === 'sha256' ? SHA256(password) : MD5(password);
+            document.getElementById('hashResult').value = hash;
+            mode === 'sign in' ? signIn(email, hash) : signUp(email, hash);
+        }
+
+        const request = (method, url, data) => {
+            const xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    alert('Successful:' + this.responseText)
+                } else if (this.readyState == 4 && this.status == 400) {
+                    alert('Failure: ' + this.responseText)
+                }
+            };
+            xhttp.open(method, url, true);
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.send(data);
+        }
+
+        const signUp = (email, password) => {
+            request("POST", 'http://localhost:3000/api/users/signup', JSON.stringify({
+                email,
+                password
+            }));
+        }
+
+        const signIn = (email, password) => {
+            request("POST", 'http://localhost:3000/api/users/signin', JSON.stringify({
+                email,
+                password
+            }));
+        }
+        
+        document.getElementById('SignInSha256').onclick = () => {
+            auth('sha256', 'sign in');
+            return false;
+        }
+        document.getElementById('SignInMd5').onclick = () => {
+            auth('md5', 'sign in');
+            return false;
+        }
+        document.getElementById('SignUpSha256').onclick = () => {
+            auth('sha256', 'sign up');
+            return false;
+        }
+        document.getElementById('getAll').onclick = () => {
+            request("GET", 'http://34.70.113.95:3000/api/users/');
+            return false;
+        }
+        document.getElementById('SignUpMd5').onclick = () => {
+            auth('md5', 'sign up');
+            return false;
+        }
+    </script>
+  </body>
+</html>

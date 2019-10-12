@@ -1,0 +1,18 @@
+const https = require('https');
+
+const fs = require('fs');
+
+const options = {
+
+  key: fs.readFileSync("/home/shellsofsilver13/localhost.key"),
+
+  cert: fs.readFileSync("/home/shellsofsilver13/local
+};
+
+https.createServer(options, function (req, res) {
+
+ res.writeHead(200);
+
+ res.end("Welcome to Node.js HTTPS Servern");
+
+}).listen(8443)
